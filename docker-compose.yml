@@ -1,0 +1,35 @@
+#
+# maintainer: "Alvaro Barcellos <alvaro.barcellos@cprm.gov.br>"
+#
+# base image for java applications from debian-slim
+#
+
+version: '2.2'
+
+networks:
+    default:
+    internal_hosts:
+        external: true
+
+services:
+  
+    tomcat-9:
+        env_file: tomcat.env
+        build: 
+            context: ./
+            dockerfile: Dockerfile
+        image: tomcat:9
+        container_name: tomcat-9
+        restart: unless-stopped
+        stdin_open: true
+        # tty: true
+        networks:
+            - internal_hosts
+        labels:
+            org.cprm.component: tomcat9
+            org.cprm.name: tomcat9
+        ports:
+            - 8080:8080
+        environment:
+            tomcat9_DEFAULT_EMAIL: admin_docker@cprm.gov.br
+

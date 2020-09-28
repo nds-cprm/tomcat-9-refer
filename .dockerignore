@@ -1,0 +1,9 @@
+.env
+.vimrc
+.screenrc
+.tmuxrc
+.git
+.github
+.cache
+*.md
+*~
