@@ -1,8 +1,20 @@
 #!/usr/bin/env bash
+# vim:sw=4:ts=4:et
 
-#set -Eeo pipefail
 # TODO swap to -Eeuo pipefail above (after handling all potentially-unset variables)
-set -x
+#set -Eeo pipefail
+set -e
+
+# need logs ?
+if [ -z "${DOCKER_ENTRYPOINT_QUIET_LOGS:-}" ]; then
+
+    exec 3>&1
+
+else
+
+    exec 3>/dev/null
+
+fi
 
 if [ "${1:0:1}" = '-' ]; then
 
@@ -19,22 +31,28 @@ fi
 
 # allow the scripts from pseudo init directory
 if [ -d "/docker-entrypoint.d/" ]; then
+    echo >&3 "$0: /docker-entrypoint.d/ is not empty, will attempt to perform configuration"
     for f in /docker-entrypoint.d/*; do
         case "$f" in
             *.sh)
                 if [ -x "$f" ]; then
-                    echo "$0: running $f"
+                    echo >&3 "$0: running $f"
                     "$f"
                 else
-                    echo "$0: sourcing $f"
+                    echo >&3 "$0: sourcing $f"
                     . "$f"
                 fi
                 ;;
             *)
-                echo "$0: ignoring $f"
+                echo >&3 "$0: ignoring $f"
                 ;;
         esac
     done
+    echo >&3 "$0: Configuration complete; ready for start up"
+else
+    echo >&3 "$0: No files found in /docker-entrypoint.d/, skipping configuration"
 fi
+
+# then we starts
 
 exec "$@"
